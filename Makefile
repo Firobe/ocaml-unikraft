@@ -54,9 +54,6 @@ all: compiler
 LIBMUSL := _build/libs/musl
 MUSLARCHIVE := $(wildcard musl-*.tar.gz)
 MUSLARCHIVEPATH := $(BEBLDLIBDIR)/libmusl/$(MUSLARCHIVE)
-LIBLWIP := _build/libs/lwip
-LWIPARCHIVE := $(wildcard lwip-*.zip)
-LWIPARCHIVEPATH := $(BEBLDLIBDIR)/liblwip/$(patsubst lwip-%,%,$(LWIPARCHIVE))
 CONFIG := dummykernel/$(PLAT)-$(TGTARCH).fullconfig
 
 UKMAKE := umask 0022 && \
@@ -64,13 +61,13 @@ UKMAKE := umask 0022 && \
        CONFIG_UK_BASE="$(UNIKRAFT)/" \
        O="$$PWD/$(BEBLDLIBDIR)/" \
        A="$$PWD/dummykernel/" \
-       L="$$PWD/$(LIBMUSL):$$PWD/$(LIBLWIP)" \
+       L="$$PWD/$(LIBMUSL)" \
        N=dummykernel \
        C="$$PWD/$(CONFIG)"
 
 # Main build rule for the dummy kernel
 $(BACKENDBUILT): $(CONFIG) | $(BEBLDLIBDIR)/Makefile $(LIB)/unikraft \
-    $(MUSLARCHIVEPATH) $(LIBMUSL) $(LWIPARCHIVEPATH) $(LIBLWIP)
+    $(MUSLARCHIVEPATH) $(LIBMUSL)
 	+$(UKMAKE) sub_make_exec=1
 	touch $@
 
@@ -89,7 +86,7 @@ $(LWIPARCHIVEPATH): $(LWIPARCHIVE)
 # Enabled only on Linux (requirement of the olddefconfig target) and in
 # development (no need to rebuild the configuration in release)
 $(CONFIG): dummykernel/$(PLAT)-$(TGTARCH).config \
-    | $(BEBLDLIBDIR)/Makefile $(LIBMUSL) $(LIBLWIP)
+    | $(BEBLDLIBDIR)/Makefile $(LIBMUSL)
 	if [ -e .git -a "`uname`" = Linux ]; then \
 	    cp $< $@; \
 	    $(UKMAKE) olddefconfig; \
@@ -105,7 +102,7 @@ $(CONFIG): dummykernel/$(PLAT)-$(TGTARCH).config \
 
 # Build the intermediate configuration file from configuration chunks
 CONFIG_CHUNKS := arch/$(TGTARCH) plat/$(PLAT)
-CONFIG_CHUNKS += libs/base libs/lwip libs/musl
+CONFIG_CHUNKS += libs/base libs/musl
 CONFIG_CHUNKS += opts/base
 # The full debug info is really verbose
 # CONFIG_CHUNKS += opts/debug
@@ -130,7 +127,7 @@ $(BEBLDLIBDIR)/Makefile: | $(BEBLDLIBDIR)
 # Trampoline target to build a Unikraft Makefile target, such as menuconfig,
 # with all the proper options set
 %.unikraft: | $(CONFIG) $(BEBLDLIBDIR)/Makefile $(LIB)/unikraft \
-    $(MUSLARCHIVEPATH) $(LIBMUSL) $(LWIPARCHIVEPATH) $(LIBLWIP)
+    $(MUSLARCHIVEPATH) $(LIBMUSL)
 	+$(UKMAKE) $*
 
 
