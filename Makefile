@@ -104,6 +104,7 @@ $(CONFIG): dummykernel/$(PLAT)-$(TGTARCH).config \
 CONFIG_CHUNKS := arch/$(TGTARCH) plat/$(PLAT)
 CONFIG_CHUNKS += libs/base libs/musl
 CONFIG_CHUNKS += opts/base
+CONFIG_CHUNKS += opts/initrd
 # The full debug info is really verbose
 # CONFIG_CHUNKS += opts/debug
 
